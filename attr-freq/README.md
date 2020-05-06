@@ -12,6 +12,17 @@ dotnet run <assembly or path-to-assemblies>
 
 ## Example
 
+### Used on itself
+
+```
+dotnet run bin/Debug/net5.0/attr-freq.dll > out
+gist out -t md -o
+```
+
+[Output](https://gist.github.com/spouliot/1efbdf07feaaf5462f1a33a06794890a)
+
+### Used on a Xamarin.iOS application
+
 ```shell
 dotnet run MyApp.app > out
 gist out -t md -o
