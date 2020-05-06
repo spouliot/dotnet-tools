@@ -14,7 +14,7 @@ dotnet run <assembly or path-to-assemblies>
 
 ### Used on itself
 
-```
+```shell
 dotnet run bin/Debug/net5.0/attr-freq.dll > out
 gist out -t md -o
 ```
@@ -25,5 +25,12 @@ gist out -t md -o
 
 ```shell
 dotnet run MyApp.app > out
+gist out -t md -o
+```
+
+### Used on Xamarin.iOS SDK assemblies
+
+```shell
+dotnet run /Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/mono/Xamarin.iOS > out
 gist out -t md -o
 ```
