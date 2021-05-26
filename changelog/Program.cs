@@ -28,6 +28,7 @@ namespace changelog
 			}
 			list.Add (pr);
 			await Process ();
+			Console.WriteLine ("Generated using https://github.com/spouliot/dotnet-tools/tree/master/changelog");
 		}
 
 		static async Task Process ()
