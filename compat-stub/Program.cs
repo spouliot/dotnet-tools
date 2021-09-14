@@ -63,7 +63,7 @@ namespace CompatibilityStub {
 			Out.Write (')');
 		}
 
-		static void Process (TypeDefinition type)
+		static void Process (TypeDefinition type, bool isTopLevel = true)
 		{
 			if (!type.IsPublic && !type.IsNestedPublic)
 				return;
@@ -71,7 +71,8 @@ namespace CompatibilityStub {
 			if ((type.Namespace != Namespace) && !(type.IsNested && type.DeclaringType.Namespace == Namespace))
 				return;
 
-			AddDotNetObsolete ();
+			if (isTopLevel)
+				AddDotNetObsolete ();
 			if (type.IsEnum) {
 				if (type.HasCustomAttributes) {
 					foreach (var ca in type.CustomAttributes) {
@@ -355,7 +356,7 @@ namespace CompatibilityStub {
 
 			if (type.HasNestedTypes) {
 				foreach (var nt in type.NestedTypes)
-					Process (nt);
+					Process (nt, false);
 			}
 		
 			IndentLevel--;
