@@ -9,8 +9,12 @@
 			"type": "coreclr",
 			"request": "launch",
 			"preLaunchTask": "build",
-			"program": "${workspaceFolder}/bin/Debug/net5.0/app-compare.dll",
-			"args": [],
+			"program": "${workspaceFolder}/bin/Debug/net6.0/app-compare.dll",
+			"args": [
+				"/Users/poupou/git/xamarin-macios/tests/dotnet/size-comparison/MySingleView/oldnet/bin/iPhone/Release/MySingleView.app",
+				"/Users/poupou/git/xamarin-macios/tests/dotnet/size-comparison/MySingleView/dotnet/bin/iPhone/Release/net6.0-ios/ios-arm64/MySingleView.app",
+				"report.md"
+			],
 			"cwd": "${workspaceFolder}",
 			"console": "internalConsole",
 			"stopAtEntry": false

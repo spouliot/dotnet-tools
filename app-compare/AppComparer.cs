@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Tools {
 	
 	public class AppComparer : DirectoryComparer
@@ -14,8 +11,8 @@ namespace Tools {
 			app2 = dir2;
 		}
 
-		string dir;
-		string app1, app2;
+		string? dir;
+		readonly string app1, app2;
 		// stats
 		long native1, native2;
 		long aotdata1, aotdata2;
@@ -40,7 +37,7 @@ namespace Tools {
 			Output.WriteLine ("| ------------------- | --: | --: | ---: | --: |");
 		}
 
-		string GetSize (FileInfo info, out long length)
+		static string GetSize (FileInfo? info, out long length)
 		{
 			length = 0;
 			if (info == null)
@@ -60,11 +57,8 @@ namespace Tools {
 				Output.Write (" | | | | |");
 			}
 
-			long s1 = 0;
-			long s2 = 0;
-
-			var d1 = GetSize (item.Info1, out s1);
-			var d2 = GetSize (item.Info2, out s2);
+			var d1 = GetSize (item.Info1, out var s1);
+			var d2 = GetSize (item.Info2, out var s2);
 			WriteStats ("    " + item.Name, s1, s2, d1, d2);
 
 			switch (Path.GetExtension (item.Name)) {
@@ -92,7 +86,7 @@ namespace Tools {
 			total2 += s2;
 		}
 
-		void WriteStats (string name, long value1, long value2, string display1 = null, string display2 = null)
+		void WriteStats (string name, long value1, long value2, string? display1 = null, string? display2 = null)
 		{
 			if (display1 == null)
 				display1 = value1.ToString ("N0");
