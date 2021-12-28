@@ -10,9 +10,9 @@ namespace AssemblyReferences {
 
 	class Program {
 
-		static DefaultAssemblyResolver resolver = new DefaultAssemblyResolver ();
-		static List<AssemblyDefinition> assemblies = new List<AssemblyDefinition>();
-		static HashSet<string> names = new HashSet<string>();
+		static readonly DefaultAssemblyResolver resolver = new ();
+		static readonly List<AssemblyDefinition> assemblies = new ();
+		static readonly HashSet<string> names = new ();
 
 		static int Main (string[] args)
 		{
@@ -78,13 +78,6 @@ namespace AssemblyReferences {
 			} else {
 				Console.WriteLine ("   -");
 			}
-
-			// Console.WriteLine ("   Type References");
-			// foreach (var tr in md.GetTypeReferences ().OrderBy ((arg) => arg.FullName))
-			// 	Console.WriteLine ("   > {0}", tr);
-			// Console.WriteLine ("   Member References");
-			// foreach (var mr in md.GetMemberReferences ().OrderBy ((arg) => arg.DeclaringType.FullName + "::" + arg.Name + "::" + arg.ToString ()))
-			// 	Console.WriteLine ("   > {0}", mr);
 		}
 	}
 }
