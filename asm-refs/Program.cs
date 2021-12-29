@@ -9,7 +9,7 @@ namespace AssemblyReferences {
 		MemberReferences,
 	}
 
-	class Program {
+	static class Program {
 
 		static readonly DefaultAssemblyResolver resolver = new ();
 		static readonly List<AssemblyDefinition> assemblies = new ();
@@ -73,7 +73,7 @@ namespace AssemblyReferences {
 							if (level > ReferenceLevel.TypeReferences) {
 								var member_refs = md.GetMemberReferences ();
 								foreach (var mr in member_refs.Where ((arg) => arg.DeclaringType.FullName == tr.FullName).OrderBy ((arg) => arg.FullName))
-									trnode.AddNode ($"[bold]MR:[/] {mr.FullName.EscapeMarkup ()}");
+									trnode.AddNode ($"[bold]MR:[/] {mr.Beautify ()}");
 							}
 						}
 					}
@@ -83,6 +83,17 @@ namespace AssemblyReferences {
 			}
 			AnsiConsole.Write (atree);
 			AnsiConsole.WriteLine ();
+		}
+
+		static string Beautify (this MemberReference mr)
+		{
+			var name = mr.FullName;
+			var ctor_pos = name.IndexOf ("::.ctor(");
+			if (ctor_pos != -1)
+				name = name [(ctor_pos + 2)..];
+			else
+				name = name.Replace (mr.DeclaringType.FullName + "::", String.Empty);
+			return name.EscapeMarkup ();
 		}
 	}
 }
