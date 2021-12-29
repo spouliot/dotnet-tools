@@ -15,7 +15,7 @@ namespace AssemblyReferences {
 		static readonly List<AssemblyDefinition> assemblies = new ();
 		static readonly HashSet<string> names = new ();
 
-		static int Main (string[] args)
+		static int Main (string [] args)
 		{
 			ReferenceLevel level = ReferenceLevel.AssemblyReferences;
 			switch (args [0].ToLowerInvariant ()) {
@@ -36,7 +36,7 @@ namespace AssemblyReferences {
 			}
 
 			var exe = Path.GetFullPath (args [1]);
-			resolver.AddSearchDirectory(Path.GetDirectoryName (exe));
+			resolver.AddSearchDirectory (Path.GetDirectoryName (exe));
 			var ad = AssemblyDefinition.ReadAssembly (exe);
 			assemblies.Add (ad);
 			for (int i = 0; i < assemblies.Count; i++) {
@@ -44,7 +44,7 @@ namespace AssemblyReferences {
 				if (names.Contains (name))
 					continue;
 				names.Add (name);
-				foreach (var ar in assemblies[i].MainModule.AssemblyReferences) {
+				foreach (var ar in assemblies [i].MainModule.AssemblyReferences) {
 					var a = resolver.Resolve (AssemblyNameReference.Parse (ar.Name));
 					if (!assemblies.Contains (a))
 						assemblies.Add (a);
