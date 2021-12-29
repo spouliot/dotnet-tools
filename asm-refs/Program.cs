@@ -1,4 +1,5 @@
 using Mono.Cecil;
+using Spectre.Console;
 
 namespace AssemblyReferences {
 
@@ -59,25 +60,28 @@ namespace AssemblyReferences {
 
 		static void ShowModule (ReferenceLevel level, ModuleDefinition md)
 		{
-			Console.WriteLine ($"A: {md.Assembly.FullName}");
+			Tree atree = new ($"[bold]A:[/] {md.Assembly.FullName}");
+			atree.Style = new (Color.Blue);
 			if (md.HasAssemblyReferences) {
 				foreach (var ar in md.AssemblyReferences.OrderBy ((arg) => arg.ToString ())) {
-					Console.WriteLine ($"   AR: {ar}");
+					var arnode = atree.AddNode ($"[bold]AR:[/] {ar}");
 					if (level > ReferenceLevel.AssemblyReferences) {
 						var type_refs = md.GetTypeReferences ();
 						foreach (var tr in type_refs.Where ((arg) => arg.Scope.ToString () == ar.FullName).OrderBy ((arg) => arg.FullName)) {
-							Console.WriteLine ($"      TR: {tr}", tr);
+							var trnode = arnode.AddNode ($"[bold]TR:[/] {tr}");
 							if (level > ReferenceLevel.TypeReferences) {
 								var member_refs = md.GetMemberReferences ();
 								foreach (var mr in member_refs.Where ((arg) => arg.DeclaringType.FullName == tr.FullName).OrderBy ((arg) => arg.FullName))
-									Console.WriteLine ($"          MR: {mr}", mr);
+									trnode.AddNode ($"[bold]MR:[/] {mr.FullName.EscapeMarkup ()}");
 							}
 						}
 					}
 				}
 			} else {
-				Console.WriteLine ("   -");
+				atree.AddNode ("");
 			}
+			AnsiConsole.Write (atree);
+			AnsiConsole.WriteLine ();
 		}
 	}
 }
