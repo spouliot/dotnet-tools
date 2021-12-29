@@ -40,11 +40,12 @@ namespace AssemblyReferences {
 			var ad = AssemblyDefinition.ReadAssembly (exe);
 			assemblies.Add (ad);
 			for (int i = 0; i < assemblies.Count; i++) {
-				var name = ad.MainModule.ToString ();
+				var asm = assemblies [i];
+				var name = asm.MainModule.ToString ();
 				if (names.Contains (name))
 					continue;
 				names.Add (name);
-				foreach (var ar in assemblies [i].MainModule.AssemblyReferences) {
+				foreach (var ar in asm.MainModule.AssemblyReferences) {
 					var a = resolver.Resolve (AssemblyNameReference.Parse (ar.Name));
 					if (!assemblies.Contains (a))
 						assemblies.Add (a);
