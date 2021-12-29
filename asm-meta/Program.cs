@@ -1,12 +1,12 @@
 using Mono.Cecil;
 using Spectre.Console;
 
-namespace AssemblyReferences {
+namespace AssemblyMetadata {
 
-	enum ReferenceLevel {
-		AssemblyReferences,
-		TypeReferences,
-		MemberReferences,
+	enum Level {
+		Assembly,
+		Type,
+		Member,
 	}
 
 	static class Program {
@@ -17,21 +17,30 @@ namespace AssemblyReferences {
 
 		static int Main (string [] args)
 		{
-			ReferenceLevel level = ReferenceLevel.AssemblyReferences;
+			bool references = true;
+			Level level = Level.Assembly;
 			switch (args [0].ToLowerInvariant ()) {
-			case "a":
+			case "ad":
+				references = false;
+				break;
 			case "ar":
 				break;
-			case "t":
-			case "tr":
-				level = ReferenceLevel.TypeReferences;
+			case "td":
+				references = false;
+				level = Level.Type;
 				break;
-			case "m":
+			case "tr":
+				level = Level.Type;
+				break;
+			case "md":
+				references = false;
+				level = Level.Member;
+				break;
 			case "mr":
-				level = ReferenceLevel.MemberReferences;
+				level = Level.Member;
 				break;
 			default:
-				Console.WriteLine ("Missing level argument: (a)ssembly, (t)ype, (m)ember references");
+				Console.WriteLine ("Missing argument: (a)ssembly | (t)ype | (m)ember references + (d)efinitions | (r)eferences");
 				return 1;
 			}
 
@@ -52,25 +61,32 @@ namespace AssemblyReferences {
 				}
 			}
 			// show the entry point (.exe) first
-			ShowModule (level, ad.MainModule);
+			if (references)
+				ShowReferences (level, ad.MainModule);
+			else
+				ShowDefinitions (level, ad.MainModule);
 			assemblies.Remove (ad);
-			foreach (var assembly in assemblies.OrderBy ((arg) => arg.FullName))
-				ShowModule (level, assembly.MainModule);
+			foreach (var assembly in assemblies.OrderBy ((arg) => arg.FullName)) {
+				if (references)
+					ShowReferences (level, assembly.MainModule);
+				else
+					ShowDefinitions (level, assembly.MainModule);
+			}
 			return 0;
 		}
 
-		static void ShowModule (ReferenceLevel level, ModuleDefinition md)
+		static void ShowReferences (Level level, ModuleDefinition md)
 		{
 			Tree atree = new ($"[bold]A:[/] {md.Assembly.FullName}");
 			atree.Style = new (Color.Blue);
 			if (md.HasAssemblyReferences) {
 				foreach (var ar in md.AssemblyReferences.OrderBy ((arg) => arg.ToString ())) {
 					var arnode = atree.AddNode ($"[bold]AR:[/] {ar}");
-					if (level > ReferenceLevel.AssemblyReferences) {
+					if (level > Level.Assembly) {
 						var type_refs = md.GetTypeReferences ();
 						foreach (var tr in type_refs.Where ((arg) => arg.Scope.ToString () == ar.FullName).OrderBy ((arg) => arg.FullName)) {
 							var trnode = arnode.AddNode ($"[bold]TR:[/] {tr}");
-							if (level > ReferenceLevel.TypeReferences) {
+							if (level > Level.Type) {
 								var member_refs = md.GetMemberReferences ();
 								foreach (var mr in member_refs.Where ((arg) => arg.DeclaringType.FullName == tr.FullName).OrderBy ((arg) => arg.FullName))
 									trnode.AddNode ($"[bold]MR:[/] {mr.Beautify ()}");
@@ -85,14 +101,36 @@ namespace AssemblyReferences {
 			AnsiConsole.WriteLine ();
 		}
 
+		static void ShowDefinitions (Level level, ModuleDefinition md)
+		{
+			Tree atree = new ($"[bold]A:[/] {md.Assembly.FullName}");
+			atree.Style = new (Color.Blue);
+			if (level > Level.Assembly) {
+				foreach (var td in md.Types.OrderBy ((arg) => arg.FullName)) {
+					var trnode = atree.AddNode ($"[bold]TD:[/] {td}");
+					if (level > Level.Type) {
+						foreach (var m in td.Methods.OrderBy ((arg) => arg.FullName))
+							trnode.AddNode ($"[bold]MD:[/] {m.Beautify ()}");
+					}
+				}
+			}
+			AnsiConsole.Write (atree);
+			AnsiConsole.WriteLine ();
+		}
+
 		static string Beautify (this MemberReference mr)
 		{
 			var name = mr.FullName;
 			var ctor_pos = name.IndexOf ("::.ctor(");
-			if (ctor_pos != -1)
+			if (ctor_pos != -1) {
 				name = name [(ctor_pos + 2)..];
-			else
-				name = name.Replace (mr.DeclaringType.FullName + "::", String.Empty);
+			} else {
+				var cctor_pos = name.IndexOf ("::.cctor(");
+				if (cctor_pos != -1)
+					name = name [(cctor_pos + 2)..];
+				else
+					name = name.Replace (mr.DeclaringType.FullName + "::", String.Empty);
+			}
 			return name.EscapeMarkup ();
 		}
 	}
