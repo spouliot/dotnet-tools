@@ -1,5 +1,6 @@
 using Mono.Cecil;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace AssemblyMetadata {
 
@@ -9,11 +10,18 @@ namespace AssemblyMetadata {
 		Member,
 	}
 
+	enum Output {
+		AnsiOnly,
+		AnsiAndTextFile,
+		ANsiAndHtmlFile,
+	}
+
 	static class Program {
 
 		static readonly DefaultAssemblyResolver resolver = new ();
 		static readonly List<AssemblyDefinition> assemblies = new ();
 		static readonly HashSet<string> names = new ();
+		static Output Output { get; set; }
 
 		static int Main (string [] args)
 		{
@@ -44,6 +52,19 @@ namespace AssemblyMetadata {
 				return 1;
 			}
 
+			if (args.Length > 3) {
+				switch (args [2]) {
+				case "--text":
+					Output = Output.AnsiAndTextFile;
+					break;
+				case "--ansi":
+					Output = Output.ANsiAndHtmlFile;
+					break;
+				}
+			} else {
+				Output = Output.AnsiOnly;
+			}
+
 			var exe = Path.GetFullPath (args [1]);
 			resolver.AddSearchDirectory (Path.GetDirectoryName (exe));
 			var ad = AssemblyDefinition.ReadAssembly (exe);
@@ -60,6 +81,10 @@ namespace AssemblyMetadata {
 						assemblies.Add (a);
 				}
 			}
+
+			if (Output != Output.AnsiOnly)
+				AnsiConsole.Record ();
+
 			// show the entry point (.exe) first
 			if (references)
 				ShowReferences (level, ad.MainModule);
@@ -72,13 +97,38 @@ namespace AssemblyMetadata {
 				else
 					ShowDefinitions (level, assembly.MainModule);
 			}
+
+			if (Output != Output.AnsiOnly) {
+				string fname = args [3];
+				string output = Output == Output.AnsiAndTextFile ? AnsiConsole.ExportText () : AnsiConsole.ExportHtml ();
+				File.WriteAllText (fname, output);
+			}
+
 			return 0;
+		}
+
+		public sealed class DiffFriendlyTreeGuide : TreeGuide
+		{
+			public override string GetPart (TreeGuidePart part)
+			{
+				return part switch
+				{
+					TreeGuidePart.Space => "  ",
+					TreeGuidePart.Continue => "  ",
+					TreeGuidePart.Fork => "* ",
+					TreeGuidePart.End => "* ",
+					_ => throw new ArgumentOutOfRangeException (nameof (part), part, "Unknown tree part."),
+				};
+			}
 		}
 
 		static void ShowReferences (Level level, ModuleDefinition md)
 		{
 			Tree atree = new ($"[bold]A:[/] {md.Assembly.FullName}");
 			atree.Style = new (Color.Blue);
+			if (Output != Output.AnsiOnly)
+				atree.Guide = new DiffFriendlyTreeGuide ();
+
 			if (md.HasAssemblyReferences) {
 				foreach (var ar in md.AssemblyReferences.OrderBy ((arg) => arg.ToString ())) {
 					var arnode = atree.AddNode ($"[bold]AR:[/] {ar}");
@@ -105,6 +155,9 @@ namespace AssemblyMetadata {
 		{
 			Tree atree = new ($"[bold]A:[/] {md.Assembly.FullName}");
 			atree.Style = new (Color.Blue);
+			if (Output != Output.AnsiOnly)
+				atree.Guide = new DiffFriendlyTreeGuide ();
+
 			if (level > Level.Assembly) {
 				foreach (var td in md.Types.OrderBy ((arg) => arg.FullName)) {
 					var trnode = atree.AddNode ($"[bold]TD:[/] {td}");

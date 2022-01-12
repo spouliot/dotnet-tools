@@ -5,10 +5,10 @@ This tool recursively shows references or definitions between assemblies, starti
 ## Usage
 
 ```shell
-dotnet run level assembly.dll
+dotnet run level assembly.dll [--text out.txt | --html out.html]
 ```
 
-where `level` is
+where `level` is mandatory and filters the elements to show.
 
 * `a` for assembly
 * `t` for type
@@ -19,8 +19,8 @@ followed by
 * `r` for references; or
 * `d` for definitions.
 
-Output is sorted so it's easier to `diff` between different versions of assemblies or applications.
-
+The output is sorted so it's easier to `diff` between different versions of assemblies or applications.
+However ANSI code makes diffs harder to read. You can ask for a text output with `--text` for nicer diffs.
 
 ## Examples
 
