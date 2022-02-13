@@ -1,5 +1,7 @@
 # Assembly Metadata
 
+> A newer version of this tool is available inside the new [cilout](https://github.com/spouliot/cilout) tool. This version remains for historical purposes but is no longer maintained.
+
 This tool recursively shows references or definitions between assemblies, starting with a root one.
 
 ## Usage
