@@ -92,7 +92,13 @@ namespace changelog
 								continue;
 							// skip duplicates (if same revisions are used)
 							if (!list.Contains (diff_url)) {
-								Console.WriteLine ($"* {uri} [{old_sha[0..7]}...{new_sha[0..7]}]({uri}/compare/{old_sha}...{new_sha})");
+								if (string.IsNullOrEmpty (old_sha)) {
+									Console.WriteLine ($"* {uri} [{new_sha[0..7]}]({uri}/commits/{new_sha}) (new dependency)");
+								} else if (string.IsNullOrEmpty (new_sha)) {
+									Console.WriteLine ($"* {uri} [{new_sha[0..7]}]({uri}/commits/{old_sha}) (removed dependency)");
+								} else {
+									Console.WriteLine ($"* {uri} [{old_sha[0..7]}...{new_sha[0..7]}]({uri}/compare/{old_sha}...{new_sha})");
+								}
 								list.Add (diff_url);
 							}
 						}
